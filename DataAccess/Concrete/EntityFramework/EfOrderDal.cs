@@ -3,15 +3,11 @@ using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace DataAccess.Concrete.EntityFramework
 {
-    //NuGet: EF eklemek için kullanıldı.
-    public class EfProductDal : EfEntityRepositoryBase<Product, NorthwindContext>,IProductDal
+    public class EfOrderDal : EfEntityRepositoryBase<Order, NorthwindContext >, IOrderDal
     {
-       
     }
 }
