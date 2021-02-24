@@ -4,6 +4,7 @@ using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
@@ -11,6 +12,7 @@ using Entities.DTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Business.Concrete
@@ -18,27 +20,33 @@ namespace Business.Concrete
     public class ProductManager : IProductService
     {
         IProductDal _productDal;
+        ICategoryService _categoryService;
 
-        public ProductManager(IProductDal productDal)
+        //bir entitymanager kendisi hariç başka dalı enjekte edemez.
+        public ProductManager(IProductDal productDal, ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
         }
 
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
-            //aynı isimde ürün eklenemez
-
+            //Eğer mevcut kategori sayısı 15'i geçtiyse sisteme yeni ürün eklenemez.
             //business codes    
 
-            if (CheckIfProductCountOfCategoryCorrect(product.CategoryId).Success)
+            IResult result = BusinessRules.Run(CheckIfProductNameExists(product.ProductName),
+                 CheckIfProductCountOfCategoryCorrect(product.CategoryId), CheckIfCategoryLimitExceeded());
+
+            if (result != null)
             {
-                _productDal.Add(product);
-
-                return new SuccessResult(Messages.ProductAdded);
-
+                return result;
             }
-            return new ErrorResult();
+
+            _productDal.Add(product);
+
+            return new SuccessResult(Messages.ProductAdded);
+
 
             //business codes:iş ihtiyaçlarımıza uygunluk.(ör:bankada verilen kredinin kişi için uygun olup olmadığını araştırmak)
             //validation:doğrulama(nesne için girilen verinin yapısal uyumuyla alakalı olan bölümüne denir.)
@@ -96,11 +104,34 @@ namespace Business.Concrete
             //Select count(*) from products where categoryId=1
             //Bir kategoride en fazla 10 ürün olabilir.
             var result = _productDal.GetAll(p => p.CategoryId == categoryId).Count;
-            if (result >= 10)
+            if (result >= 15)
             {
                 return new ErrorResult(Messages.ProductCountOfCategoryError);
             }
             return new SuccessResult();
+        }
+
+        //aynı isimde ürün eklenemez
+        private IResult CheckIfProductNameExists(string productName)
+        {
+            //Select count(*) from products where categoryId=1
+            var result = _productDal.GetAll(p => p.ProductName == productName).Any();
+            if (result)
+            {
+                return new ErrorResult(Messages.ProductNameAlreadyExists);
+            }
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfCategoryLimitExceeded()
+        {
+            var result = _categoryService.GetAll();
+            if (result.Data.Count > 15)
+            {
+                return new ErrorResult(Messages.CategoryLimitExceeded);
+            }
+
+             return new SuccessResult();
         }
     }
 }
