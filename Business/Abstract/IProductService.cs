@@ -15,6 +15,7 @@ namespace Business.Abstract
         IDataResult<List<ProductDetailDto>> GetProductDetails();
         IDataResult<Product> GetById(int productId);
         IResult Add(Product product); //void'i data olmadığı çin IResult yaptık, diğerlerini data var diye IDataResult olarak aldık.
+        IResult Update(Product product);
 
         //http:(internet protokolü ,bir kaynağa ulaşmak için izlediğimiz yol)
         //RESTFUL --> HTTP --> 
