@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
@@ -30,9 +31,11 @@ namespace Business.Concrete
         }
 
         //Claim
+        [SecuredOperation("product.add, admin")]
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
+
             //Eğer mevcut kategori sayısı 15'i geçtiyse sisteme yeni ürün eklenemez.
             //business codes    
 
