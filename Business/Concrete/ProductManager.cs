@@ -57,7 +57,7 @@ namespace Business.Concrete
             //interception : araya girmek demek
 
         }
-
+        [CacheAspect]//key:cache e verilen isim, value:cachein değeri
         public IDataResult<List<Product>> GetAll()
         {
             if (DateTime.Now.Hour == 22)
