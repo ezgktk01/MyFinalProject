@@ -17,6 +17,7 @@ namespace Business.Abstract
         IResult Add(Product product); //void'i data olmadığı çin IResult yaptık, diğerlerini data var diye IDataResult olarak aldık.
         IResult Update(Product product);
 
+        IResult AddTransactionalTest(Product product);//uygulamalarda tutarlığı sağlamak için kullanılır.
         //http:(internet protokolü ,bir kaynağa ulaşmak için izlediğimiz yol)
         //RESTFUL --> HTTP --> 
     }
